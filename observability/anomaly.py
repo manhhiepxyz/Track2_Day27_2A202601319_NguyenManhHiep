@@ -10,8 +10,14 @@ from typing import Any, Iterable
 import numpy as np
 
 
-def zscore_detector(current: float, history: Iterable[float], threshold: float = 3.0) -> dict[str, Any]:
+def _numeric_history(history: Iterable[float]) -> np.ndarray:
+    """Convert an iterable to finite observations only."""
     values = np.asarray(list(history), dtype=float)
+    return values[np.isfinite(values)]
+
+
+def zscore_detector(current: float, history: Iterable[float], threshold: float = 3.0) -> dict[str, Any]:
+    values = _numeric_history(history)
     if values.size < 3:
         return {"is_anomaly": False, "score": 0.0, "method": "zscore", "reason": "insufficient_history"}
     mean = float(np.mean(values))
@@ -33,7 +39,7 @@ def mad_detector(current: float, history: Iterable[float], threshold: float = 3.
 
     Students may improve this function and/or use it from auto mode.
     """
-    values = np.asarray(list(history), dtype=float)
+    values = _numeric_history(history)
     if values.size < 5:
         return {"is_anomaly": False, "score": 0.0, "method": "mad", "reason": "insufficient_history"}
     median = float(np.median(values))

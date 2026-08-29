@@ -32,7 +32,6 @@ def calculate_slo(target: float, bad_events: int, total_events: int) -> dict[str
 
 
 def evaluate_multiwindow_burn(
-    *,
     short_window_burn: float,
     long_window_burn: float,
     policy: str = "starter",
