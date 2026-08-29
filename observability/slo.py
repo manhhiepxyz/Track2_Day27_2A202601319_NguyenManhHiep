@@ -42,7 +42,7 @@ def evaluate_multiwindow_burn(
     Alerts if both short window (e.g. 5m) and long window (e.g. 1h) 
     burn rates exceed the threshold, indicating sustained fast burn.
     """
-    burn_threshold = 14.4  # Example threshold for 99.9% SLO
+    burn_threshold = 1.0  # Alert if both windows are burning budget faster than allowed
     
     is_sustained = (short_window_burn > burn_threshold) and (long_window_burn > burn_threshold)
     is_transient = (short_window_burn > burn_threshold) and (long_window_burn <= burn_threshold)

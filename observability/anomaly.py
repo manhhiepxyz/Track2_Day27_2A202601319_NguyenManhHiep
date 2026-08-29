@@ -39,7 +39,10 @@ def mad_detector(current: float, history: Iterable[float], threshold: float = 3.
     median = float(np.median(values))
     mad = float(np.median(np.abs(values - median)))
     if mad == 0:
-        return {"is_anomaly": False, "score": 0.0, "method": "mad", "reason": "mad_is_zero_todo"}
+        if float(current) == median:
+            return {"is_anomaly": False, "score": 0.0, "method": "mad", "reason": "mad_zero_match"}
+        else:
+            return {"is_anomaly": True, "score": float("inf"), "method": "mad", "reason": "mad_zero_mismatch"}
     modified_z = 0.6745 * abs(float(current) - median) / mad
     return {
         "is_anomaly": bool(modified_z > threshold),
@@ -71,6 +74,10 @@ def detect_anomaly(
     if method == "mad":
         return mad_detector(current, history)
     if method == "auto":
+        # Handle known events
+        if context and context.get("known_event"):
+            return {"is_anomaly": False, "score": 0.0, "method": "auto:known_event", "reason": f"known_event: {context['known_event']}"}
+            
         # Make auto context-aware
         if context and context.get("day_of_week") in [5, 6]:
             # Weekend handling, MAD is robust
