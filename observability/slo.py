@@ -37,15 +37,24 @@ def evaluate_multiwindow_burn(
     long_window_burn: float,
     policy: str = "starter",
 ) -> dict[str, Any]:
-    """TODO(student): implement a real multi-window burn-rate policy.
-
-    Starter intentionally never pages. Hidden evaluation contains cases that
-    require distinguishing sustained fast burn from a transient spike.
+    """Multi-window burn-rate policy.
+    
+    Alerts if both short window (e.g. 5m) and long window (e.g. 1h) 
+    burn rates exceed the threshold, indicating sustained fast burn.
     """
+    burn_threshold = 14.4  # Example threshold for 99.9% SLO
+    
+    is_sustained = (short_window_burn > burn_threshold) and (long_window_burn > burn_threshold)
+    is_transient = (short_window_burn > burn_threshold) and (long_window_burn <= burn_threshold)
+    
+    page = is_sustained
+    severity = "critical" if is_sustained else "warning" if is_transient else "info"
+    reason = "sustained_burn" if is_sustained else "transient_spike" if is_transient else "normal"
+    
     return {
-        "page": False,
-        "severity": "info",
-        "reason": "starter_policy_not_implemented",
+        "page": page,
+        "severity": severity,
+        "reason": reason,
         "short_window_burn": short_window_burn,
         "long_window_burn": long_window_burn,
     }

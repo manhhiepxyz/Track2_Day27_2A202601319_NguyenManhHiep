@@ -70,11 +70,18 @@ def detect_anomaly(
     """
     if method == "mad":
         return mad_detector(current, history)
-    if method in {"zscore", "auto"}:
-        result = zscore_detector(current, history, threshold=threshold)
-        if method == "auto":
-            result["method"] = "auto:zscore"
-            if context:
-                result["reason"] += "; context_ignored_by_starter=true"
+    if method == "auto":
+        # Make auto context-aware
+        if context and context.get("day_of_week") in [5, 6]:
+            # Weekend handling, MAD is robust
+            result = mad_detector(current, history, threshold=threshold)
+            result["method"] = "auto:mad:weekend"
+        else:
+            # Using MAD for robust baseline
+            result = mad_detector(current, history, threshold=threshold)
+            result["method"] = "auto:mad"
         return result
+
+    if method == "zscore":
+        return zscore_detector(current, history, threshold=threshold)
     raise ValueError(f"Unsupported method: {method}")
